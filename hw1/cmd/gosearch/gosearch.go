@@ -5,30 +5,31 @@ import (
 	"fmt"
 	"flag"
 	"strings"
-	"hw1/pkg/crawler"
-	"hw1/pkg/crawler/spider"
+	"homeworks/hw1/pkg/crawler"
+	"homeworks/hw1/pkg/crawler/spider"
 )
 
-var s *string
+var s *string = flag.String("s", "", "search text")
+var scanner *spider.Service = spider.New()
 
 func main() {
 	flag.Parse()
 
-	docs := []crawler.Document{}
+	var allDocs []crawler.Document
 	sites := [...]string{"https://go.dev", "https://golang.org/"}
-	for i := 0; i < len(sites); i++ {
-		siteDocs, err := scan(sites[i])
+	for _, site := range sites {
+		docs, err := scan(site)
 		if err != nil {
 			log.Println(err)
 			return
 		}
-		for _, doc := range siteDocs {
-			docs = append(docs, doc)
+		for _, doc := range docs {
+			allDocs = append(allDocs, doc)
 		}
 	}
 
 	if *s != "" {
-		refs := findRefs(docs)
+		refs := findRefs(allDocs)
 		for _, ref := range refs {
 			fmt.Println(ref)
 		}
@@ -36,19 +37,14 @@ func main() {
 	}
 }
 
-func init() {
-	s = flag.String("s", "", "search text")
-}
-
 func scan(site string) ([]crawler.Document, error) {
 	log.Println("Сканирование сайта " + site)
 
-	scanner := spider.New()
 	return scanner.Scan(site, 2)
 }
 
 func findRefs(docs []crawler.Document) ([]string) {
-	res := []string{}
+	var res []string
 	for _, doc := range docs {
 		if strings.Contains(doc.Title, *s) || strings.Contains(doc.Body, *s) {
 			res = append(res, doc.URL)
