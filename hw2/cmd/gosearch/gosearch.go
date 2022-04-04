@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"bufio"
 	"os"
 	"homeworks/hw2/pkg/index"
@@ -14,7 +13,8 @@ func main() {
 	ind := index.New()
 	err := ind.Scan(urls)
 	if err != nil {
-		log.Panic(err)
+		fmt.Println(err)
+		return
 	}
 
 	scanner := bufio.NewScanner(os.Stdin)
