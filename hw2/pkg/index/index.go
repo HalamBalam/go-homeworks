@@ -1,43 +1,34 @@
 package index
 
 import (
-	"log"
 	"sort"
 	"strings"
 	"homeworks/hw2/pkg/crawler"
-	"homeworks/hw2/pkg/crawler/spider"
 )
 
 type Index struct{
 	Docs []crawler.Document
 	Data map[string][]int
+	LastID int
 }
-
-var scanner *spider.Service = spider.New()
 
 func New() *Index {
 	i := Index{}
 	i.Data = make(map[string][]int)
+	i.LastID = 0
 	return &i
 }
 
-func (i *Index) Scan(urls []string) error {
-	id := 0
-	for _, url := range urls {
-		docs, err := scan(url)
-		if err != nil {
-			return err
-		}
-		for _, doc := range docs {
-			id++
-			doc.ID = id
-			i.Docs = append(i.Docs, doc)
+func (i *Index) AddDocs(docs []crawler.Document) {
+	for _, doc := range docs {
+		i.LastID++
+		doc.ID = i.LastID
+		i.Docs = append(i.Docs, doc)
 
-			words := strings.Split(doc.Title, " ")
-			for _, word := range words {
-				if len(word) > 1 && find(i.Data[word], doc.ID) == -1 {
-					i.Data[word] = append(i.Data[word], doc.ID)
-				}
+		words := strings.Split(doc.Title, " ")
+		for _, word := range words {
+			if len(word) > 1 && findID(i.Data[word], doc.ID) == -1 {
+				i.Data[word] = append(i.Data[word], doc.ID)
 			}
 		}
 	}
@@ -45,8 +36,6 @@ func (i *Index) Scan(urls []string) error {
 	sort.Slice(i.Docs, func(a, b int) bool {
 	  return i.Docs[a].ID < i.Docs[b].ID
 	})
-
-	return nil
 }
 
 func (i *Index) Find(word string) []string {
@@ -61,15 +50,9 @@ func (i *Index) Find(word string) []string {
 	return res
 }
 
-func scan(url string) ([]crawler.Document, error) {
-	log.Println("Сканирование сайта " + url)
-
-	return scanner.Scan(url, 2)
-}
-
-func find(data []int, item int) int {
+func findID(data []int, ID int) int {
 	for i := range data {
-		if data[i] == item {
+		if data[i] == ID {
 			return i
 		}
 	}

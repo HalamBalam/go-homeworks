@@ -5,22 +5,25 @@ import (
 	"bufio"
 	"os"
 	"homeworks/hw2/pkg/index"
+	"homeworks/hw2/pkg/crawler/spider"
 )
+
+var scanner *spider.Service = spider.New()
 
 func main() {
 	urls := []string{"https://go.dev", "https://golang.org/"}
 
 	ind := index.New()
-	err := ind.Scan(urls)
+	err := fillInd(ind, urls)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	scanner := bufio.NewScanner(os.Stdin)
+	console := bufio.NewScanner(os.Stdin)
 	fmt.Print("Найти-> ")
-	for scanner.Scan() {
-		word := scanner.Text()
+	for console.Scan() {
+		word := console.Text()
 		if word == "exit" {
 			break
 		}
@@ -32,4 +35,19 @@ func main() {
 		fmt.Printf("Найдено %d ссылок\n", len(findUrls))
 		fmt.Print("Найти-> ")
 	}
+}
+
+func fillInd(ind *index.Index, urls []string) error {
+	for _, url := range urls {
+		fmt.Println("Сканирование сайта " + url)
+
+		docs, err := scanner.Scan(url, 2)
+		if err != nil {
+			return err
+		}
+
+		ind.AddDocs(docs)
+	}
+
+	return nil
 }
