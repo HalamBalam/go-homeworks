@@ -8,6 +8,7 @@ import (
 	"homeworks/hw2/pkg/index"
 	"io"
 	"os"
+	"strings"
 )
 
 var scanner = spider.New()
@@ -16,14 +17,13 @@ var indPath = "./index.json"
 func main() {
 	urls := []string{"https://go.dev", "https://golang.org/"}
 
-	ind := index.New()
+	var ind *index.Index
 	var err error
 	if _, err = os.Stat(indPath); err == nil {
-		err = readIndFromFile(ind)
+		ind, err = readIndFromFile(indPath)
 	} else {
-		err = fillInd(ind, urls)
+		ind, err = fillInd(urls)
 	}
-
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -32,7 +32,7 @@ func main() {
 	console := bufio.NewScanner(os.Stdin)
 	fmt.Print("Найти-> ")
 	for console.Scan() {
-		word := console.Text()
+		word := strings.ToLower(console.Text())
 		if word == "exit" {
 			break
 		}
@@ -46,17 +46,19 @@ func main() {
 	}
 }
 
-func readIndFromFile(ind *index.Index) error {
+func readIndFromFile(indPath string) (*index.Index, error) {
 	file, err := os.Open(indPath)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer file.Close()
 
-	return readInd(ind, file)
+	return readInd(file)
 }
 
-func readInd(ind *index.Index, r io.Reader) error {
+func readInd(r io.Reader) (*index.Index, error) {
+	ind := index.New()
+
 	var data []byte
 	var buf = make([]byte, 10)
 	for {
@@ -65,32 +67,35 @@ func readInd(ind *index.Index, r io.Reader) error {
 			break
 		}
 		if err != nil {
-			return err
+			return ind, err
 		}
 		if n > 0 {
 			data = append(data, buf[0:n]...)
 		}
 	}
 
-	return json.Unmarshal(data, ind)
+	err := json.Unmarshal(data, ind)
+	return ind, err
 }
 
-func fillInd(ind *index.Index, urls []string) error {
+func fillInd(urls []string) (*index.Index, error) {
+	ind := index.New()
 	for _, url := range urls {
 		fmt.Println("Сканирование сайта " + url)
 
 		docs, err := scanner.Scan(url, 2)
 		if err != nil {
-			return err
+			continue
 		}
 		ind.AddDocs(docs)
 	}
 
 	file, err := os.Create(indPath)
 	if err != nil {
-		return err
+		return ind, err
 	}
-	return writeInd(ind, file)
+	err = writeInd(ind, file)
+	return ind, err
 }
 
 func writeInd(ind *index.Index, w io.Writer) error {
