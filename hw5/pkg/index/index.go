@@ -1,7 +1,7 @@
 package index
 
 import (
-	"homeworks/hw2/pkg/crawler"
+	"homeworks/hw3/pkg/crawler"
 	"sort"
 	"strings"
 )

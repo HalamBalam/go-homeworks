@@ -1,53 +1,54 @@
 package main
 
 import (
+	"flag"
 	"fmt"
-	"bufio"
-	"os"
-	"homeworks/hw2/pkg/index"
+	"homeworks/hw2/pkg/crawler"
 	"homeworks/hw2/pkg/crawler/spider"
+	"log"
+	"strings"
 )
 
+var s *string = flag.String("s", "", "search text")
 var scanner *spider.Service = spider.New()
 
 func main() {
-	urls := []string{"https://go.dev", "https://golang.org/"}
+	flag.Parse()
 
-	ind := index.New()
-	err := fillInd(ind, urls)
-	if err != nil {
-		fmt.Println(err)
-		return
+	var allDocs []crawler.Document
+	sites := [...]string{"https://go.dev", "https://golang.org/"}
+	for _, site := range sites {
+		docs, err := scan(site)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		for _, doc := range docs {
+			allDocs = append(allDocs, doc)
+		}
 	}
 
-	console := bufio.NewScanner(os.Stdin)
-	fmt.Print("Найти-> ")
-	for console.Scan() {
-		word := console.Text()
-		if word == "exit" {
-			break
+	if *s != "" {
+		refs := findRefs(allDocs)
+		for _, ref := range refs {
+			fmt.Println(ref)
 		}
-		
-		findUrls := ind.Find(word)
-		for _, url := range findUrls {
-			fmt.Println(url)
-		}
-		fmt.Printf("Найдено %d ссылок\n", len(findUrls))
-		fmt.Print("Найти-> ")
+		fmt.Printf("Найдено %d ссылок", len(refs))
 	}
 }
 
-func fillInd(ind *index.Index, urls []string) error {
-	for _, url := range urls {
-		fmt.Println("Сканирование сайта " + url)
+func scan(site string) ([]crawler.Document, error) {
+	log.Println("Сканирование сайта " + site)
 
-		docs, err := scanner.Scan(url, 2)
-		if err != nil {
-			return err
+	return scanner.Scan(site, 2)
+}
+
+func findRefs(docs []crawler.Document) []string {
+	var res []string
+	for _, doc := range docs {
+		if strings.Contains(doc.Title, *s) || strings.Contains(doc.Body, *s) {
+			res = append(res, doc.URL)
 		}
-
-		ind.AddDocs(docs)
 	}
-
-	return nil
+	return res
 }
