@@ -69,6 +69,7 @@ func sampleDataFloat64() []float64 {
 
 func BenchmarkInts(b *testing.B) {
 	data := sampleDataInt()
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		sort.Ints(data)
 	}
@@ -76,6 +77,7 @@ func BenchmarkInts(b *testing.B) {
 
 func BenchmarkFloat64s(b *testing.B) {
 	data := sampleDataFloat64()
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		sort.Float64s(data)
 	}
