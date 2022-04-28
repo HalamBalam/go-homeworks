@@ -8,12 +8,8 @@ type Customer2 struct {
 	Age int
 }
 
-type Person2 interface {
-	Employee2 | Customer2
-}
-
-func OldestPerson[T Person2](persons ...T) T {
-	var res T
+func OldestPerson(persons ...any) any {
+	var res any
 	if len(persons) == 0 {
 		return res
 	}
@@ -21,7 +17,7 @@ func OldestPerson[T Person2](persons ...T) T {
 	maxAge := 0
 	for _, p := range persons {
 		age := 0
-		switch p1 := any(p).(type) {
+		switch p1 := p.(type) {
 		case Employee2:
 			age = p1.Age
 		case Customer2:

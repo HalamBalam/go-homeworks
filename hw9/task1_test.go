@@ -54,6 +54,18 @@ func TestMaximumAge(t *testing.T) {
 			args: args{persons: []Person{}},
 			want: 0,
 		},
+		{
+			name: "Test #6",
+			args: args{persons: []Person{
+				&Customer{43},
+				&Customer{22},
+				&Employee{18},
+				&Customer{66},
+				&Employee{56},
+				&Employee{18},
+			}},
+			want: 66,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
