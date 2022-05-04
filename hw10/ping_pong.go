@@ -9,7 +9,6 @@ import (
 
 type player struct {
 	name   string
-	first  bool
 	points int
 }
 
@@ -28,7 +27,6 @@ func game(p *player, ch chan string, wg *sync.WaitGroup) {
 		if val == "begin" {
 			fmt.Println("--------------")
 			fmt.Println(p.name + ": ping")
-			p.first = true
 			ch <- "ping"
 		}
 
@@ -39,14 +37,12 @@ func game(p *player, ch chan string, wg *sync.WaitGroup) {
 				ch <- "end"
 				break
 			} else {
-				p.first = false
 				ch <- "begin"
 			}
 		}
 
-		if val == "ping" && !p.first {
+		if val == "ping" {
 			if rand.Intn(100) < failPercent {
-				p.first = false
 				ch <- "stop"
 			} else {
 				fmt.Println(p.name + ": pong")
@@ -54,9 +50,8 @@ func game(p *player, ch chan string, wg *sync.WaitGroup) {
 			}
 		}
 
-		if val == "pong" && p.first {
+		if val == "pong" {
 			if rand.Intn(100) < failPercent {
-				p.first = false
 				ch <- "stop"
 			} else {
 				fmt.Println(p.name + ": ping")
@@ -69,8 +64,8 @@ func game(p *player, ch chan string, wg *sync.WaitGroup) {
 func main() {
 	rand.Seed(time.Now().Unix())
 
-	p1 := player{"Роланд Якоби", false, 0}
-	p2 := player{"Виктор Барна", false, 0}
+	p1 := player{name: "Роланд Якоби"}
+	p2 := player{name: "Виктор Барна"}
 	defer showScore(&p1, &p2)
 
 	var wg sync.WaitGroup
