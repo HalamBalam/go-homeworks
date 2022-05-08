@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"log"
 	"net"
 	"os"
 	"strings"
@@ -12,7 +11,7 @@ import (
 func main() {
 	conn, err := net.Dial("tcp4", "localhost:8000")
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
 	}
 	defer conn.Close()
 
@@ -26,13 +25,15 @@ func main() {
 
 		_, err := conn.Write([]byte(word + "\n"))
 		if err != nil {
-			log.Fatal(err)
+			fmt.Println(err)
+			return
 		}
 		reader := bufio.NewReader(conn)
 		for {
 			b, err := reader.ReadBytes('\n')
 			if err != nil {
-				log.Fatal(err)
+				fmt.Println(err)
+				return
 			}
 			if len(b) == 1 {
 				break
