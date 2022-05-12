@@ -7,26 +7,27 @@ import (
 	"net/http"
 )
 
-var Ind *index.Index
-
-func Start() error {
-	r := mux.NewRouter()
-	endpoints(r)
-
-	return http.ListenAndServe(":8080", r)
+type Service struct {
+	ind *index.Index
 }
 
-func endpoints(r *mux.Router) {
-	r.HandleFunc("/index", indexHandler).Methods(http.MethodGet)
-	r.HandleFunc("/docs", docsHandler).Methods(http.MethodGet)
+func New(ind *index.Index, r *mux.Router) Service {
+	s := Service{ind: ind}
+	s.endpoints(r)
+	return s
 }
 
-func indexHandler(w http.ResponseWriter, _ *http.Request) {
-	writeIndData(w, Ind.Data)
+func (s *Service) endpoints(r *mux.Router) {
+	r.HandleFunc("/index", s.indexHandler).Methods(http.MethodGet)
+	r.HandleFunc("/docs", s.docsHandler).Methods(http.MethodGet)
 }
 
-func docsHandler(w http.ResponseWriter, _ *http.Request) {
-	writeIndData(w, Ind.Docs)
+func (s *Service) indexHandler(w http.ResponseWriter, _ *http.Request) {
+	writeIndData(w, s.ind.Data)
+}
+
+func (s *Service) docsHandler(w http.ResponseWriter, _ *http.Request) {
+	writeIndData(w, s.ind.Docs)
 }
 
 func writeIndData(w http.ResponseWriter, indData any) {

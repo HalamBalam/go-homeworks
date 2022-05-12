@@ -8,9 +8,15 @@ import (
 	"time"
 )
 
-var Ind *index.Index
+type Service struct {
+	ind *index.Index
+}
 
-func Start() error {
+func New(ind *index.Index) Service {
+	return Service{ind: ind}
+}
+
+func (s *Service) Start() error {
 	listener, err := net.Listen("tcp4", ":8000")
 	if err != nil {
 		return err
@@ -22,12 +28,11 @@ func Start() error {
 		if err != nil {
 			return err
 		}
-		go handler(conn)
+		go handler(conn, s)
 	}
-
 }
 
-func handler(conn net.Conn) {
+func handler(conn net.Conn, s *Service) {
 	defer conn.Close()
 	conn.SetDeadline(time.Now().Add(time.Minute))
 
@@ -39,7 +44,7 @@ func handler(conn net.Conn) {
 		}
 		word := strings.ToLower(string(msg))
 
-		findUrls := Ind.Find(word)
+		findUrls := s.ind.Find(word)
 		for _, url := range findUrls {
 			_, err = conn.Write([]byte(url + "\n"))
 			if err != nil {

@@ -1,8 +1,6 @@
 package webapp
 
 import (
-	"bytes"
-	"encoding/json"
 	"github.com/gorilla/mux"
 	"homeworks/hw12/pkg/crawler"
 	"homeworks/hw12/pkg/index"
@@ -20,36 +18,20 @@ func TestMain(m *testing.M) {
 		crawler.Document{URL: "https://teachbase.ru/", Title: "Platform for learning courses"},
 	)
 
-	Ind = index.New()
-	Ind.AddDocs(docs)
-
 	r = mux.NewRouter()
-	endpoints(r)
+
+	ind := index.New()
+	ind.AddDocs(docs)
+	New(ind, r)
+
 	m.Run()
 }
 
 func Test_indexHandler(t *testing.T) {
-	data := []int{}
-	payload, _ := json.Marshal(data)
-	req := httptest.NewRequest(http.MethodPost, "/index", bytes.NewBuffer(payload))
+	req := httptest.NewRequest(http.MethodGet, "/index", nil)
 	req.Header.Add("content-type", "plain/text")
 
 	rr := httptest.NewRecorder()
-
-	r.ServeHTTP(rr, req)
-
-	if rr.Code != http.StatusMethodNotAllowed {
-		t.Errorf("код неверен: получили %d, а хотели %d", rr.Code, http.StatusOK)
-	}
-
-	t.Log("Response: ", rr.Body)
-
-	//=========================================================
-
-	req = httptest.NewRequest(http.MethodGet, "/index", nil)
-	req.Header.Add("content-type", "plain/text")
-
-	rr = httptest.NewRecorder()
 
 	r.ServeHTTP(rr, req)
 
@@ -66,27 +48,10 @@ func Test_indexHandler(t *testing.T) {
 }
 
 func Test_docsHandler(t *testing.T) {
-	data := []int{}
-	payload, _ := json.Marshal(data)
-	req := httptest.NewRequest(http.MethodPost, "/docs", bytes.NewBuffer(payload))
+	req := httptest.NewRequest(http.MethodGet, "/docs", nil)
 	req.Header.Add("content-type", "plain/text")
 
 	rr := httptest.NewRecorder()
-
-	r.ServeHTTP(rr, req)
-
-	if rr.Code != http.StatusMethodNotAllowed {
-		t.Errorf("код неверен: получили %d, а хотели %d", rr.Code, http.StatusOK)
-	}
-
-	t.Log("Response: ", rr.Body)
-
-	//=========================================================
-
-	req = httptest.NewRequest(http.MethodGet, "/docs", nil)
-	req.Header.Add("content-type", "plain/text")
-
-	rr = httptest.NewRecorder()
 
 	r.ServeHTTP(rr, req)
 

@@ -2,10 +2,12 @@ package main
 
 import (
 	"fmt"
+	"github.com/gorilla/mux"
 	"homeworks/hw12/pkg/crawler/spider"
 	"homeworks/hw12/pkg/index"
 	"homeworks/hw12/pkg/netsrv"
 	"homeworks/hw12/pkg/webapp"
+	"net/http"
 )
 
 var scanner = spider.New()
@@ -16,11 +18,12 @@ func main() {
 
 	ind = createInd(urls)
 
-	netsrv.Ind = ind
-	go netsrv.Start()
+	srv := netsrv.New(ind)
+	go srv.Start()
 
-	webapp.Ind = ind
-	err := webapp.Start()
+	r := mux.NewRouter()
+	webapp.New(ind, r)
+	err := http.ListenAndServe(":8080", r)
 	if err != nil {
 		fmt.Println(err)
 	}
