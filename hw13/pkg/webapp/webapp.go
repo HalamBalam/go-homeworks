@@ -8,11 +8,13 @@ import (
 	"net/http"
 )
 
+// Service - служба веб-приложения.
 type Service struct {
 	ind *index.Index
 	api *api.Service
 }
 
+// New - конструктор веб-приложения.
 func New(ind *index.Index, r *mux.Router) Service {
 	s := Service{ind: ind}
 	s.api = api.New(r, ind)

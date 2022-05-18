@@ -8,14 +8,17 @@ import (
 	"time"
 )
 
+// Service - сетевая служба.
 type Service struct {
 	ind *index.Index
 }
 
+// New - конструктор сетевой службы.
 func New(ind *index.Index) Service {
 	return Service{ind: ind}
 }
 
+// Start - запускает сетевую службу.
 func (s *Service) Start() error {
 	listener, err := net.Listen("tcp4", ":8000")
 	if err != nil {

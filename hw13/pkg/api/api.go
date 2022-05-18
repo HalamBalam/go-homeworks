@@ -7,13 +7,17 @@ import (
 	"homeworks/hw13/pkg/index"
 	"net/http"
 	"strconv"
+	"sync"
 )
 
+// Service - служба API.
 type Service struct {
 	router *mux.Router
 	ind    *index.Index
+	mu     sync.Mutex
 }
 
+// New - конструктор службы API.
 func New(router *mux.Router, ind *index.Index) *Service {
 	s := Service{router: router, ind: ind}
 	s.endpoints()
@@ -64,9 +68,11 @@ func (s *Service) updateDocFull(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if _, doc, ok := s.ind.FindDoc(id); ok {
+		s.mu.Lock()
 		doc.URL = d.URL
 		doc.Title = d.Title
 		doc.Body = d.Body
+		s.mu.Unlock()
 	} else {
 		http.Error(w, "Doc is not found", http.StatusNotFound)
 	}
@@ -85,6 +91,7 @@ func (s *Service) updateDocPart(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if _, doc, ok := s.ind.FindDoc(id); ok {
+		s.mu.Lock()
 		if len(d.URL) > 0 {
 			doc.URL = d.URL
 		}
@@ -94,6 +101,7 @@ func (s *Service) updateDocPart(w http.ResponseWriter, r *http.Request) {
 		if len(d.Body) > 0 {
 			doc.Body = d.Body
 		}
+		s.mu.Unlock()
 	} else {
 		http.Error(w, "Doc is not found", http.StatusNotFound)
 	}

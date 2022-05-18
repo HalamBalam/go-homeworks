@@ -6,12 +6,14 @@ import (
 	"strings"
 )
 
+// Index - обратный индекс документов.
 type Index struct {
 	Docs   []crawler.Document
 	Data   map[string][]int
 	LastID int
 }
 
+// New - конструктор обратного индекса.
 func New() *Index {
 	i := Index{}
 	i.Data = make(map[string][]int)
@@ -19,6 +21,7 @@ func New() *Index {
 	return &i
 }
 
+// AddDocs - добавляет список документов к существующему индексу.
 func (i *Index) AddDocs(docs []crawler.Document) {
 	for _, doc := range docs {
 		i.LastID++
@@ -39,6 +42,7 @@ func (i *Index) AddDocs(docs []crawler.Document) {
 	})
 }
 
+// Find - ищет в индексе слово, возвращает список найденных url.
 func (i *Index) Find(word string) []string {
 	var res = make([]string, 0)
 	ids := i.Data[word]
@@ -50,6 +54,7 @@ func (i *Index) Find(word string) []string {
 	return res
 }
 
+// FindDoc - ищет в индексе документ по идентификатору. Возвращает позицию и сам документ.
 func (i *Index) FindDoc(id int) (int, *crawler.Document, bool) {
 	low, high := 0, len(i.Docs)-1
 	for low <= high {

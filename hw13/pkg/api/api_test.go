@@ -8,7 +8,6 @@ import (
 	"homeworks/hw13/pkg/index"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"strconv"
 	"testing"
 )
@@ -26,7 +25,7 @@ func TestMain(m *testing.M) {
 	r := mux.NewRouter()
 	api = New(r, ind)
 
-	os.Exit(m.Run())
+	m.Run()
 }
 
 func TestService_search(t *testing.T) {
@@ -132,7 +131,7 @@ func TestService_updateDocFull(t *testing.T) {
 }
 
 func TestService_updateDocPart(t *testing.T) {
-	id := 1
+	id := 2
 	d := crawler.Document{URL: "https://www.google.com/"}
 	payload, _ := json.Marshal(d)
 	req := httptest.NewRequest(http.MethodPatch, "/api/v1/docs/"+strconv.Itoa(id), bytes.NewBuffer(payload))
@@ -152,7 +151,7 @@ func TestService_updateDocPart(t *testing.T) {
 	}
 
 	got = api.ind.Docs[id-1].Title
-	want = "The Go Programming Language"
+	want = "Platform for learning courses"
 	if !(got == want) {
 		t.Errorf("Заголовок документа неверен: получили %s, а хотели %s", got, want)
 	}
