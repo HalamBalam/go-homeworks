@@ -9,7 +9,6 @@ import (
 )
 
 func main() {
-	// создание клиента RPC
 	client, err := rpc.Dial("tcp", "localhost:8080")
 	if err != nil {
 		log.Fatal("dialing:", err)
@@ -37,6 +36,6 @@ func main() {
 	}
 
 	for _, m := range resp {
-		fmt.Println(m.ToString())
+		fmt.Println(m.String())
 	}
 }
