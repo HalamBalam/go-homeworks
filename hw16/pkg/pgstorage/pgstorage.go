@@ -7,9 +7,17 @@ import (
 	"homeworks/hw16/pkg/storage"
 )
 
-func AddMovies(ctx context.Context, db *pgxpool.Pool, movies []storage.Movie) error {
+type DB struct {
+	pool *pgxpool.Pool
+}
+
+func New(pool *pgxpool.Pool) *DB {
+	return &DB{pool: pool}
+}
+
+func (db *DB) AddMovies(ctx context.Context, movies []storage.Movie) error {
 	// начало транзакции
-	tx, err := db.Begin(ctx)
+	tx, err := db.pool.Begin(ctx)
 	if err != nil {
 		return err
 	}
@@ -34,19 +42,19 @@ func AddMovies(ctx context.Context, db *pgxpool.Pool, movies []storage.Movie) er
 	return tx.Commit(ctx)
 }
 
-func DeleteMovie(ctx context.Context, db *pgxpool.Pool, m storage.Movie) error {
-	_, err := db.Exec(ctx, `DELETE FROM movies WHERE id = $1`, m.ID)
+func (db *DB) DeleteMovie(ctx context.Context, m storage.Movie) error {
+	_, err := db.pool.Exec(ctx, `DELETE FROM movies WHERE id = $1`, m.ID)
 	return err
 }
 
-func UpdateMovie(ctx context.Context, db *pgxpool.Pool, m storage.Movie) error {
-	_, err := db.Exec(ctx, `UPDATE movies
+func (db *DB) UpdateMovie(ctx context.Context, m storage.Movie) error {
+	_, err := db.pool.Exec(ctx, `UPDATE movies
 								SET name = $1, year = $2, box_office = $3, rating = $4, company_id = $5
 								WHERE id = $6`, m.Name, m.Year, m.BoxOffice, m.Rating, m.CompanyID, m.ID)
 	return err
 }
 
-func GetMovies(ctx context.Context, db *pgxpool.Pool, companyIds ...int) ([]storage.Movie, error) {
+func (db *DB) GetMovies(ctx context.Context, companyIds ...int) ([]storage.Movie, error) {
 	var rows pgx.Rows
 	var err error
 	sql := `
@@ -54,9 +62,9 @@ func GetMovies(ctx context.Context, db *pgxpool.Pool, companyIds ...int) ([]stor
 		FROM movies`
 	if len(companyIds) > 0 {
 		sql += ` WHERE company_id = $1`
-		rows, err = db.Query(ctx, sql, companyIds[0])
+		rows, err = db.pool.Query(ctx, sql, companyIds[0])
 	} else {
-		rows, err = db.Query(ctx, sql)
+		rows, err = db.pool.Query(ctx, sql)
 	}
 	if err != nil {
 		return nil, err
@@ -86,9 +94,9 @@ func GetMovies(ctx context.Context, db *pgxpool.Pool, companyIds ...int) ([]stor
 	return movies, nil
 }
 
-func AddCompanies(ctx context.Context, db *pgxpool.Pool, comps []storage.Company) error {
+func (db *DB) AddCompanies(ctx context.Context, comps []storage.Company) error {
 	// начало транзакции
-	tx, err := db.Begin(ctx)
+	tx, err := db.pool.Begin(ctx)
 	if err != nil {
 		return err
 	}
@@ -112,8 +120,8 @@ func AddCompanies(ctx context.Context, db *pgxpool.Pool, comps []storage.Company
 	return tx.Commit(ctx)
 }
 
-func ClearDB(ctx context.Context, db *pgxpool.Pool) error {
-	_, err := db.Exec(ctx, `DELETE FROM movies;
+func (db *DB) ClearDB(ctx context.Context) error {
+	_, err := db.pool.Exec(ctx, `DELETE FROM movies;
 								DELETE FROM companies`)
 	return err
 }

@@ -2,7 +2,6 @@ package storage
 
 import (
 	"context"
-	"github.com/jackc/pgx/v4/pgxpool"
 )
 
 type Movie struct {
@@ -20,8 +19,10 @@ type Company struct {
 }
 
 type Interface interface {
-	AddMovies(context.Context, *pgxpool.Pool, []Movie) error
-	DeleteMovie(context.Context, *pgxpool.Pool, Movie) error
-	UpdateMovie(context.Context, *pgxpool.Pool, Movie) error
-	GetMovies(context.Context, *pgxpool.Pool, ...int) ([]Movie, error)
+	AddMovies(context.Context, []Movie) error
+	DeleteMovie(context.Context, Movie) error
+	UpdateMovie(context.Context, Movie) error
+	GetMovies(context.Context, ...int) ([]Movie, error)
+	AddCompanies(context.Context, []Company) error
+	ClearDB(ctx context.Context) error
 }
